@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pic2HTML</title>
+<script>
+//Author: Lutz Tautenhahn, 2003, 2024, https://www.lutanho.net/
+var Sel=-1;
+var W=[0,10,10,10];
+var H=[0,10,10,10]; 
+var P=[1,1,1,0,0,0.325,0.325,12];
+var Pic=new Image();
+var PicWidth=0, PicHeight=0;
+var XPos=[5,15];
+var YPos=[5,15];
+var Font="font-size:2.5px;line-height:2.5px;letter-spacing:-0px;font-family:Courier";
+
+function Init()
+{ el("PicDiv").addEventListener("mousedown",doMouseDown,false);
+  el("PicDiv").addEventListener("mousemove",doMouseMove,false);
+  el("PicDiv").addEventListener("mouseup",doMouseUp,false);
+  el("PicDiv").addEventListener("mouseout",doMouseUp,false);  
+  loadPic();
+}
+
+function el(ii)
+{ return(document.getElementById(ii));
+}
+
+function loadPic()
+{ Pic.src=el("url").value;
+  document.getElementById("PicImg").src=Pic.src;  
+}
+
+function InitImg()
+{ PicWidth=parseInt(Pic.width);
+  PicHeight=parseInt(Pic.height);
+  el('PicDiv').style.width=PicWidth+"px";
+  el('PicDiv').style.height=PicHeight+"px";
+  el("PicSize").innerHTML="("+PicWidth+" x "+PicHeight+")";
+  el("mouseCatcher").style.width=Pic.width+"px";
+  el("mouseCatcher").style.height=Pic.height+"px";
+
+  XPos[0]=0;
+  XPos[1]=PicWidth;
+  YPos[0]=0;
+  YPos[1]=PicHeight;
+    
+  Sel=-1;
+  UpdHdl(0);
+  UpdHdl(1);
+  UpdSpr(1,1);
+  UpdCanvas();
+}
+
+function UpdCanvas()
+{ var ii = document.getElementById("PicImg");
+  var oo=el("Canvas");
+  oo.width=(XPos[1]-XPos[0]);
+  oo.height=(YPos[1]-YPos[0]);
+  oo.style.width=(XPos[1]-XPos[0])+"px";
+  oo.style.height=(YPos[1]-YPos[0])+"px";
+  var cc = oo.getContext("2d");
+  el('brightness').title=el('brightness').value;
+  el('contrast').title=el('contrast').value;
+  el('grayscale').title=el('grayscale').value;
+  cc.filter = "brightness("+el('brightness').value+") contrast("+el('contrast').value+") grayscale("+el('grayscale').value+")";
+  cc.drawImage(ii, XPos[0], YPos[0], (XPos[1]-XPos[0]), (YPos[1]-YPos[0]), 0, 0, (XPos[1]-XPos[0]), (YPos[1]-YPos[0]));
+}
+
+function UpdSpr(ii,ss)
+{ if (ii<2)
+  { el("Spr1").style.left=XPos[0]+"px";
+    el("Spr1").style.top=YPos[0]+"px";
+    el("Spr1").style.width=(XPos[1]-XPos[0])+"px";
+    el("Spr1").style.height=(YPos[1]-YPos[0])+"px";
+    if (ss);
+    else
+    { L0=Math.min(XPos[0],PicWidth-XPos[1]);
+      T0=Math.min(YPos[0],PicHeight-YPos[1]);
+      L=L0;
+      T=T0;
+    }
+  }
+}
+
+function UpdHdl(ii)
+{ el("hdl"+ii).style.left=(XPos[ii]-5)+"px";
+  el("hdl"+ii).style.top=(YPos[ii]-5)+"px";
+  el("SelSize").innerHTML="("+XPos[0]+", "+YPos[0]+") -> ("+XPos[1]+", "+YPos[1]+") = ("+(XPos[1]-XPos[0])+" x "+(YPos[1]-YPos[0])+")";
+}
+
+function doMouseDown(event)
+{ var mx=parseInt(event.offsetX);
+  var my=parseInt(event.offsetY);
+  Sel=-1;
+  var ii;
+  for (ii=0; ii<2; ii++)
+  { if ((Math.abs(XPos[ii]-mx)<5)&&(Math.abs(YPos[ii]-my)<5)) Sel=ii;
+  }
+}
+
+function doMouseMove(event)
+{ var mx=parseInt(event.offsetX);
+  var my=parseInt(event.offsetY);
+  if ((Sel==0)||(Sel==1))
+  { if (Sel==0)
+    { mx-=2;
+      my-=2;
+      if ((XPos[1]-mx)>=30) XPos[0]=Math.max(0,mx); 
+      if ((YPos[1]-my)>=30) YPos[0]=Math.max(0,my);
+    }
+    else
+    { mx+=3;
+      my+=3;
+      if ((mx-XPos[0])>=30) XPos[1]=Math.min(mx,PicWidth); 
+      if ((my-YPos[0])>=30) YPos[1]=Math.min(my,PicHeight);
+    }
+    UpdHdl(Sel);
+    UpdSpr(Sel);    
+  }
+}
+
+function doMouseUp(event)
+{ var mx=parseInt(event.offsetX);
+  var my=parseInt(event.offsetY);
+  Sel=-1;
+  UpdCanvas();
+}
+</script>
+<style>
+body{margin:0px; font-family:Arial;background-color:#eeeeee}
+.w {font-size:15px; background-color:#ffffff; border:0px; padding:4px 16px 4px 16px; margin:4px 0px 4px 0px;}
+.g {font-size:15px; background-color:#dddddd; border-top:1px solid #808080; border-bottom:1px solid #999999; padding:8px 20px 8px 20px; margin:4px 0px 4px 0px;}
+td, th {font-size:14px; text-align:left; vertical-align:middle;}
+th {font-size:16px; font-weight:bold}
+.w100 {width:100px;}
+span {font-size:15px; font-weight:bold}
+input {padding:0px; text-align:center}
+.sp0 { background-color:rgba(128,128,128,0.5) }
+.sp1 { background-color:rgba(255,255,255,0.3) }
+.hdl { width:10px; height:10px; border-radius:3px; background-color:rgba(255,0,0,0.5) }
+</style>
+</head>
+<body onload="Init()">
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td style="padding-left:24px">
+
+<div id="Stgs">
+
+<div class=w><table border=0 cellpadding=0 cellspacing=4><tr><th>Pic2HTML</th></tr></table></div>
+
+<div class=g><table border=0 cellpadding=0 cellspacing=0 style="width:100%"><tr><td><input id="url" value="https://www.lutanho.net/goodies/img/lena.jpg" style="text-align:left;width:100%"></td><td style="width:60px; text-align:right"><input type=button onclick="loadPic()" value="Load" style="width:50px"></td></tr></table></div>
+
+<div class=w>
+<table border=0 cellpadding=0 cellspacing=4><tr><td>
+<div id='PicDiv' style='position:relative; left:0px; top:0px; overflow:hidden;'>
+<img src="" crossorigin="anonymous" id='PicImg' onload="InitImg()">
+<div id='Spr1' class='sp1' style='position:absolute;left:0px;top:0px;width:10px;height:10px'>
+</div>
+<div id='hdl0' class='hdl' style='position:absolute;left:-5px;top:-5px;'></div>
+<div id='hdl1' class='hdl' style='position:absolute;left:15px;top:15px;'></div>
+<div id='mouseCatcher' style='position:absolute;left:0px;top:0px;'></div>
+</div>
+</td></tr></table>
+</div>
+
+<div class=g>original image size: <span id="PicSize">&nbsp;</span>&nbsp;&nbsp;&nbsp;selection: <span id="SelSize">&nbsp;</span></div>
+
+<div class=w><form><table border=0 cellpadding=0 cellspacing=4>
+<tr><th class=w100>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ratio</th>
+<th nowrap>
+<input type=radio name=Ratio value=1 checked> 1:2 (large)&nbsp;&nbsp;
+<input type=radio name=Ratio value=2> 1:1 (normal)&nbsp;&nbsp;
+<input type=radio name=Ratio value=3> 3:2 (small)&nbsp;&nbsp;
+<input type=radio name=Ratio value=4> 2:1 (tiny)
+</th></tr>
+<tr><th colspan=2><hr></th></tr>
+<tr><th class=w100><input type=radio name=BW checked value=1>B&W</th>
+<th nowrap>
+<input type=radio name=BWEncoding value=0> Plain&nbsp;&nbsp;
+<input type=radio name=BWEncoding value=1> Pattern&nbsp;&nbsp;
+<input type=radio name=BWEncoding value=2 checked> Dotted&nbsp;&nbsp;
+<input type=radio name=BWEncoding value=3> Fractal<br>
+<input type=radio name=Colorized checked value=0> Gray&nbsp;&nbsp;
+<input type=radio name=Colorized value=1> Colorized&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type=checkbox name=BWSmoothTransition value=1 checked>Smooth Transition
+</th></tr>
+<tr><th colspan=2><hr></th></tr>
+<tr><th class=w100><input type=radio name=BW value=0>Colored</th>
+<th nowrap>
+<input type=radio name=HighQuality value=1> Lower Quality&nbsp;&nbsp;
+<input type=radio name=HighQuality value=0 checked> Higher Quality&nbsp;&nbsp;
+<input type=checkbox name=MinimizeSize value=1 checked>Minimize Size
+</th></tr>
+</table></form></div>
+<div class=w><input id=FontStyle style='width:560px;text-align:left;font-size:16px' value='font-size:3px;line-height:2.5px;letter-spacing:-0.5px;font-family:Courier'></div>
+<div class=g><input type=button onclick="StartEncode()" value="Encode" style="width:80px"></div>
+<div class=w>brightness: <input id='brightness' style='width:100px' type=range min=0.5 step=0.05 max=2.5 value=1 oninput='UpdCanvas()'>&nbsp;&nbsp;&nbsp;contrast: <input id='contrast' style='width:100px' type=range min=0.5 step=0.05 max=2.5 value=1 oninput='UpdCanvas()'>&nbsp;&nbsp;&nbsp;grayscale: <input id='grayscale' style='width:50px' type=range min=0 step=0.1 max=1 value=0 oninput='UpdCanvas()'></div>
+<div class=w><canvas id="Canvas" width="1" height="1" style='width:1px;height:1px;'></canvas></div>
+
+<div class=w><textarea id='outtext' cols=60 rows=12 style='width:580px'></textarea></div>
+
+</div>
+</td>
+</tr></table>
+
+<script>
+var imgData;
+function StartEncode()
+{ var oo=el("Canvas");
+  var cc = oo.getContext("2d",{ willReadFrequently: true });
+  imgData = cc.getImageData(0, 0, XPos[1]-XPos[0], YPos[1]-YPos[0]);  
+  if (el('FontStyle').value) Font=el('FontStyle').value;
+  else el('FontStyle').value=Font;
+  var ff=document.forms[0];
+  var tt=Encode(
+    parseInt(ff.BW.value), 
+    parseInt(ff.Ratio.value), 
+    parseInt(ff.Colorized.value), 
+    parseInt(ff.HighQuality.value), 
+    ff.MinimizeSize.checked, 
+    parseInt(ff.BWEncoding.value), 
+    ff.BWSmoothTransition.checked);
+  el('outtext').value=tt;
+  var ww=window.open('','');
+  with (ww.document)
+  { open();
+    writeln(tt);
+    close();
+  }
+}
+
+//all code below is adapted from my old VisualBasic file
+
+function Encode(BW, Ratio, Colorized, HighQuality, MinimizeSize, BWEncoding, BWSmoothTransition)
+{ var ii, ll, ww, tt, hh, xx, yy, rr, gg, bb, cc, cc_last, cc_str, cc_count, hh_Shape;
+  var Col, ssCol, ffCol, bbCol, ssCol_last, ffCol_last, bbCol_last, ttHTML="", iiHTML, iiHTMLm, iiHTMLt;  
+  var ccStrP = ["II", "I.", "I ", ". ", "&nbsp; "];
+  var ccStr0 = ["II", "I'", ".'", ". ", "&nbsp; "];
+  var ccStr1 = ["II", "I.", "'.", "' ", "&nbsp; "];
+  //var ccStr0 = ["II", "I.", "I ", ". ", "&nbsp; "];
+  //var ccStr1 = ["II", "I.", "I ", ". ", "&nbsp; "];
+  var ccStr=[];
+  ccStr[0] = ["II", "I.", "I ", "' ", "&nbsp; "];
+  ccStr[1] = ["II", "'I", "''", "' ", "&nbsp; "];
+  ccStr[2] = ["II", "'I", "&nbsp;I", "&nbsp;.", "&nbsp; "];
+  ccStr[3] = ["II", "I.", "..", "&nbsp;.", "&nbsp; "];
+  var cc10=String.fromCharCode(10);
+  iiHTML = "<html><head></head><body><div align=center>"
+
+  ll = 0; 
+  tt = 0;
+  ww = XPos[1]-XPos[0];
+  hh = YPos[1]-YPos[0];
+  ww = ww - Ratio - (ww % Ratio);
+  hh = hh - Ratio - (hh % Ratio);
+  if (Colorized)
+  { Col=GetBWColors(BWEncoding, ll, tt, ww, hh);
+    ffCol=Col[0];
+    bbCol=Col[1];
+    ssCol = ";background-color:" + bbCol + ";color:" + ffCol;
+  }
+  else
+  { BWColMin = 0; BWColMax = 255 * 6;
+    ssCol = "";
+  }
+  if (Ratio == 1)
+  { //with (TextForm.WebBrowser1.Document)
+    { //open();
+      ttHTML += iiHTML;
+      if (BW) ttHTML += "<table border=0 cellpadding=0 cellspacing=0 height=" + (2 * hh + 2) + " width=" + (2 * ww + 2) + " style='" + Font + ssCol + "'>";
+      for (yy = tt; yy <= tt + hh; yy++)
+      { if (BW)
+          iiHTML = cc10+"<tr><td><nobr>";
+        else
+        { iiHTML = "<table border=0 cellpadding=0 cellspacing=0 height=2 width=" + (2 * ww + 2) + " style='" + Font + "'>"+cc10+"<tr>";
+          if (MinimizeSize) iiHTMLm = "<table border=0 cellpadding=0 cellspacing=0 height=2 width=" + (2 * ww + 2) + " style='" + Font + "'>"+cc10+"<tr>";
+        }
+        cc_last = "";
+        cc_count = 0;
+        for (xx = ll; xx<= ll + ww; xx++)
+        { //cc = Pic.Point(xx, yy) //todo
+          //Long2RGB(cc, rr, gg, bb);
+          ii=4*yy*(ww+1)+4*xx;
+          rr=imgData.data[ii+0];
+          gg=imgData.data[ii+1];
+          bb=imgData.data[ii+2];
+          if (BW)
+          { cc = (2 * rr + 3 * gg + bb);
+            if (BWSmoothTransition) cc = cc + ((xx + yy) % 2) * 154 - 77;
+            if (cc < 0) cc = 0;
+            if (cc > 255 * 6) cc = 255 * 6;            
+            switch(BWEncoding)
+            { case 0:
+                cc = Math.floor(6 * 255 * (cc - BWColMin) / (BWColMax - BWColMin));
+                if (cc < 0) cc = 0;
+                if (cc > 6 * 255) cc = 6 * 255;
+                cc = Math.floor(cc / 766); //c=0, 1
+                iiHTML += ccStrP[4 * cc];
+                break;
+              case 1:
+                cc = Math.floor(cc / 308); //c=0, 1, 2, 3, 4
+                iiHTML += ccStrP[cc];
+                break;
+              case 2:
+                cc = Math.floor(cc / 308); //c=0, 1, 2, 3, 4
+                if ((xx + yy) & 2 == 0)
+                  iiHTML += ccStr0[cc];
+                else
+                  iiHTML += ccStr1[cc];
+                break;
+              case 3:
+                cc = Math.floor(cc / 308); //c=0, 1, 2, 3, 4
+                hh_Shape = GetHilbertShape(xx, yy);
+                iiHTML += ccStr[hh_Shape][cc];
+                break;
+            }
+          }
+          else
+          { cc_str = RGB2String(rr, gg, bb);
+            iiHTML += "<td bgcolor=" + cc_str + "></td>";
+            if (MinimizeSize)
+            { if (cc_str != cc_last && cc_count > 0)
+              { iiHTMLm += "<td width=" + (cc_count * 2) + " bgcolor=" + cc_last + "></td>";
+                cc_count = 1;
+              }
+              else
+                cc_count = cc_count + 1;
+              cc_last = cc_str;
+            }
+          }
+        }
+        if (BW)
+          iiHTML += "</nobr></td></tr>";
+        else
+        { if (MinimizeSize)
+          { iiHTMLm = iiHTMLm + "<td width=" + (cc_count * 2) + " bgcolor=" + cc_last + "></td>";
+            if (iiHTML.length > iiHTMLm.length) iiHTML = iiHTMLm;
+          }
+          iiHTML += "</tr></table>";
+        }
+        ttHTML += iiHTML;
+      }
+      if (BW)
+        ttHTML += "</table></div></body></html>";
+      else
+        ttHTML += "</div></body></html>";
+      //close();
+    }
+  }
+  else
+  { //with (TextForm.WebBrowser1.Document)
+    { //open();
+      ttHTML += iiHTML;
+      if (BW) ttHTML += "<table border=0 cellpadding=0 cellspacing=0 height=" + Math.floor(2 * hh / Ratio + 2) + " width=" + Math.floor(2 * ww / Ratio + 2) + " style='" + Font + ssCol + "'>";
+      for (yy = tt; yy <= tt + hh; yy += Ratio)
+      { if (BW)
+          iiHTML = cc10+"<tr><td><nobr>";
+        else
+        { iiHTML = "<table border=0 cellpadding=0 cellspacing=0 height=2 width=" + Math.floor(2 * ww / Ratio + 2) + " style='" + Font + "'>"+cc10+"<tr>";
+          if (MinimizeSize) iiHTMLm = "<table border=0 cellpadding=0 cellspacing=0 height=2 width=" + Math.floor(2 * ww / Ratio + 2) + " style='" + Font + "'>"+cc10+"<tr>";
+        }
+        cc_count = 0;
+        bbCol_last = "";
+        for (xx = ll; xx <= ll + ww; xx += Ratio)
+        { if (BW)
+            iiHTML += GetPixBW(xx, yy, Ratio, Ratio, BWEncoding, BWSmoothTransition);
+          else
+          { if (HighQuality)
+            { Col=PixColHiQu(xx, yy, Ratio, Ratio);
+              bbCol=Col[0];
+              ffCol=Col[1];
+              ssCol=Col[2];
+              iiHTML += "<td bgcolor=" + bbCol + "><font color=" + ffCol + ">" + ssCol + "</font></td>";
+              if (MinimizeSize)
+              { if (bbCol != bbCol_last)
+                { if (cc_count > 0) iiHTMLm = iiHTMLm + "<td width=" + (cc_count * 2) + iiHTMLt + "</font></td>";
+                  iiHTMLt = " bgcolor=" + bbCol + "><font color=" + ffCol + ">" + ssCol;
+                  cc_count = 1;
+                }
+                else
+                { if (ffCol != ffCol_last)
+                    iiHTMLt += "</font><font color=" + ffCol + ">" + ssCol;
+                  else
+                    iiHTMLt += ssCol;
+                  cc_count = cc_count + 1;
+                }
+                bbCol_last = bbCol;
+                ffCol_last = ffCol;
+              }
+            }
+            else
+            { bbCol = GetPixColLoQu(xx, yy, Ratio, Ratio);
+              iiHTML += "<td bgcolor=" + bbCol + "></td>";
+              if (MinimizeSize)
+              { if (bbCol != bbCol_last && cc_count > 0)
+                { iiHTMLm += "<td width=" + (cc_count * 2) + " bgcolor=" + bbCol_last + "></td>";
+                  cc_count = 1;
+                }
+                else
+                  cc_count = cc_count + 1;
+                bbCol_last = bbCol;
+              }
+            }
+          }
+        }
+        if (BW)
+          iiHTML += "</nobr></td></tr>";
+        else
+        { if (MinimizeSize)
+          { if (HighQuality)
+              iiHTMLm += "<td width=" + (cc_count * 2) + iiHTMLt + "</font></td>";
+            else
+              iiHTMLm += "<td width=" + (cc_count * 2) + " bgcolor=" + bbCol_last + "></td>";
+            if (iiHTML.length > iiHTMLm.length) iiHTML = iiHTMLm;
+          }
+          iiHTML += "</tr></table>";
+        }
+        ttHTML += iiHTML;
+      }
+      if (BW)
+        ttHTML += "</table></div></body></html>";
+      else
+        ttHTML += "</div></body></html>";
+      //close();
+    }
+  }
+  cc_str = "";
+  switch(Ratio)
+  { case 1: cc_str = "1;2"; break;
+    case 2: cc_str = "1;1"; break;
+    case 3: cc_str = "3;2"; break;
+    case 4: cc_str = "2;1"; break;
+  }
+  if (BW)
+  { cc_str = cc_str + "  B&W";
+    switch(BWEncoding)
+    { case 0: cc_str = cc_str + "  Plain"; break;
+      case 1: cc_str = cc_str + "  Pattern"; break;
+      case 2: cc_str = cc_str + "  Dotted"; break;
+      case 3: cc_str = cc_str + "  Fractal"; break;
+    }
+    if (Colorized)
+      cc_str = cc_str + "  Colorized";
+    else
+      cc_str = cc_str + "  Grey";
+  }
+  else
+  { cc_str = cc_str + "  Colored";
+    if (HighQuality)
+      cc_str = cc_str + "  High-Quality";
+    else
+      cc_str = cc_str + "  Low-Quality";
+    if (MinimizeSize) cc_str = cc_str + "  Size-Minimized";
+  }
+  //TextForm.Caption = cc_str; //todo
+  return(ttHTML);
+}
+
+function RGB2String(rr, gg, bb)
+{ var cc = "#"; 
+  var ss = "0123456789ABCDEF";
+  cc = cc + ss.charAt(Math.floor(rr / 16)) + ss.charAt(rr % 16);
+  cc = cc + ss.charAt(Math.floor(gg / 16)) + ss.charAt(gg % 16);
+  cc = cc + ss.charAt(Math.floor(bb / 16)) + ss.charAt(bb % 16);
+  return(cc);
+}
+
+function Long2RGB(Color, Red, Green, Blue)
+{ var cc = Color;
+  var vv = cc % 256;
+  Red = vv;
+  cc = Math.floor((cc - vv) / 256);
+  vv = cc % 256;
+  Green = vv;
+  Blue = Math.floor((cc - vv) / 256);
+}
+
+function Long2BW(Color, Red)
+{ var vv = (Color & 255) + Math.floor((Color & 25280) / 256) + Math.floor((Color & 16711680) / 65536);
+  Red = Math.round(vv / 3);
+}
+
+function GetBWColors(BWEncoding, Left, Top, Width, Height)
+{ var ii, rr0, gg0, bb0, rr1, gg1, bb1, ffCol, bbCol;
+  var rrs=[], ggs=[], bbs=[], ss=[];
+  var rr, gg, bb, xx, yy, nn, cc, tt, nn_cc;
+  for (nn = 1; nn<=8; nn++)
+  { ss[nn] = 0;
+    rrs[nn] = 0;
+    ggs[nn] = 0;
+    bbs[nn] = 0;
+  }
+  rr0 = 255; gg0 = 255; bb0 = 255;
+  rr1 = 0; gg1 = 0; bb1 = 0;
+  for (yy = 0; yy < Height; yy++)
+  { for (xx = 0; xx < Width; xx++)
+    { //cc = Pic.Point(xx + Left, yy + Top) //todo
+      //Long2RGB(cc, rr, gg, bb);
+      ii=4*(yy+Top)*(XPos[1]-XPos[0])+4*(xx+Left);
+      rr=imgData.data[ii+0];
+      gg=imgData.data[ii+1];
+      bb=imgData.data[ii+2];
+      
+      if (rr0 > rr) rr0 = rr;
+      if (gg0 > gg) gg0 = gg;
+      if (bb0 > bb) bb0 = bb;
+      if (rr1 < rr) rr1 = rr;
+      if (gg1 < gg) gg1 = gg;
+      if (bb1 < bb) bb1 = bb;
+    }
+  }
+  for (yy = 0; yy < Height; yy++)
+  { for (xx = 0; xx < Width; xx++)
+    { //cc = Pic.Point(xx + Left, yy + Top) //todo
+      //Long2RGB(cc, rr, gg, bb);
+      ii=4*(yy+Top)*(XPos[1]-XPos[0])+4*(xx+Left);
+      rr=imgData.data[ii+0];
+      gg=imgData.data[ii+1];
+      bb=imgData.data[ii+2];
+      nn = 1;
+      if (rr - rr0 > rr1 - rr) nn = nn + 1;
+      if (gg - gg0 > gg1 - gg) nn = nn + 2;
+      if (bb - bb0 > bb1 - bb) nn = nn + 4;
+      ss[nn] = ss[nn] + 1;
+      rrs[nn] = rrs[nn] + rr;
+      ggs[nn] = ggs[nn] + gg;
+      bbs[nn] = bbs[nn] + bb;
+    }
+  }
+  rr = 1;
+  for (nn = 2; nn<=8; nn++)
+  { if (ss[nn] > ss[rr]) rr = nn;
+  }
+  gg = rr;
+  for (nn = 1; nn<=8; nn++)
+  { if (nn != rr)
+    { if (gg == rr)
+      { if (ss[nn] > 0) gg = nn;
+      }
+      else
+      { if (ss[nn] > ss[gg]) gg = nn;
+      }
+    }
+  }
+  nn_cc = 0;
+  for (nn = 1; nn<=8; nn++)
+  { if (ss[nn] > 0)
+    { rrs[nn] = Math.floor(rrs[nn] / ss[nn]);
+      ggs[nn] = Math.floor(ggs[nn] / ss[nn]);
+      bbs[nn] = Math.floor(bbs[nn] / ss[nn]);
+      nn_cc = nn_cc + 1;
+    }
+  }
+  if (2 * rrs[gg] + 3 * ggs[gg] + bbs[gg] < 2 * rrs[rr] + 3 * ggs[rr] + bbs[rr])
+  { nn = rr; rr = gg; gg = nn; }
+  if (nn_cc > 2 && BWEncoding > 0)
+  { rr0 = rrs[gg] + Math.floor((rrs[gg] - rrs[rr]) / 4) + Math.floor((255 - rrs[gg]) / 32);
+    gg0 = ggs[gg] + Math.floor((ggs[gg] - ggs[rr]) / 4) + Math.floor((255 - ggs[gg]) / 32);
+    bb0 = bbs[gg] + Math.floor((bbs[gg] - bbs[rr]) / 4) + Math.floor((255 - bbs[gg]) / 32);
+    rr1 = rrs[rr] - Math.floor((rrs[rr] - rrs[gg]) / 4) - Math.floor(rrs[rr] / 32);
+    gg1 = ggs[rr] - Math.floor((ggs[rr] - ggs[gg]) / 4) - Math.floor(ggs[rr] / 32);
+    bb1 = bbs[rr] - Math.floor((bbs[rr] - bbs[gg]) / 4) - Math.floor(bbs[rr] / 32);
+    if (rr0 < 0) rr0 = 0;
+    if (gg0 < 0) gg0 = 0;
+    if (bb0 < 0) bb0 = 0;
+    if (rr0 > 255) rr0 = 255;
+    if (gg0 > 255) gg0 = 255;
+    if (bb0 > 255) bb0 = 255;
+    if (rr1 < 0) rr1 = 0;
+    if (gg1 < 0) gg1 = 0;
+    if (bb1 < 0) bb1 = 0;
+    if (rr1 > 255) rr1 = 255;
+    if (gg1 > 255) gg1 = 255;
+    if (bb1 > 255) bb1 = 255;
+  }
+  else
+  { rr0 = rrs[gg];
+    gg0 = ggs[gg];
+    bb0 = bbs[gg];
+    rr1 = rrs[rr];
+    gg1 = ggs[rr];
+    bb1 = bbs[rr];
+  }
+  bbCol = RGB2String(rr0, gg0, bb0);
+  ffCol = RGB2String(rr1, gg1, bb1);  
+  BWColMin = (2 * rr1 + 3 * gg1 + bb1);
+  BWColMax = (2 * rr0 + 3 * gg0 + bb0);
+  if (BWColMin == BWColMax)
+  { BWColMin = 0;
+    BWColMax = 255;
+    bbCol = "#FFFFFF";
+    ffCol = "#000000";
+  }
+  return([ffCol, bbCol]);
+}
+
+function PixColHiQu(Left, Top, Width, Height)
+{ var ii, rr0, gg0, bb0, nn0, rr1, gg1, bb1, nn1, cc, xx, yy, ss, bbCol, ffCol, ssCol;
+  var xxc, yyc, minDist, maxDist, Dist, fgCol, bgCol, nnStr;
+  var rr=[], gg=[], bb=[];
+  var ss = ["II", ".I", "I.", "..", "I'", ".'", "I&nbsp;", ".&nbsp;"];
+  //ss = Array("II", ".I", "I.", "..", "I'", ".'", "I&nbsp;", ".&nbsp;")
+  for (xx = 1; xx <= 4; xx++)
+  { rr[xx] = 0;
+    gg[xx] = 0; 
+    bb[xx] = 0;
+  }
+  for (yy = 0; yy < Height; yy++)
+  { yyc = 3;
+    if (2 * yy + 2 <= Height) yyc = 0;
+    if (2 * yy >= Height) yyc = 6;
+    for (xx = 0; xx < Width; xx++)
+    { //cc = Pic.Point(xx + Left, yy + Top) //todo
+      //Long2RGB(cc, rr0, gg0, bb0);
+      ii=4*(yy+Top)*(XPos[1]-XPos[0])+4*(xx+Left);
+      rr0=imgData.data[ii+0];
+      gg0=imgData.data[ii+1];
+      bb0=imgData.data[ii+2];
+      xxc = 1;
+      if (2 * xx + 2 <= Width) xxc = 0;
+      if (2 * xx >= Width) xxc = 2;
+      xxc = xxc + yyc;
+      switch(xxc)
+      { case 0: rr[1] = rr[1] + 4 * rr0; gg[1] = gg[1] + 4 * gg0; bb[1] = bb[1] + 4 * bb0; break;
+        case 1: rr[1] = rr[1] + 2 * rr0; gg[1] = gg[1] + 2 * gg0; bb[1] = bb[1] + 2 * bb0;
+                rr[2] = rr[2] + 2 * rr0; gg[2] = gg[2] + 2 * gg0; bb[2] = bb[2] + 2 * bb0; break;
+        case 2: rr[2] = rr[2] + 4 * rr0; gg[2] = gg[2] + 4 * gg0; bb[2] = bb[2] + 4 * bb0; break;
+        case 3: rr[1] = rr[1] + 2 * rr0; gg[1] = gg[1] + 2 * gg0; bb[1] = bb[1] + 2 * bb0;
+                rr[3] = rr[3] + 2 * rr0; gg[3] = gg[3] + 2 * gg0; bb[3] = bb[3] + 2 * bb0; break;
+        case 4: rr[1] = rr[1] + rr0; gg[1] = gg[1] + gg0; bb[1] = bb[1] + bb0;
+                rr[2] = rr[2] + rr0; gg[2] = gg[2] + gg0; bb[2] = bb[2] + bb0;
+                rr[3] = rr[3] + rr0; gg[3] = gg[3] + gg0; bb[3] = bb[3] + bb0;
+                rr[4] = rr[4] + rr0; gg[4] = gg[4] + gg0; bb[4] = bb[4] + bb0; break;
+        case 5: rr[2] = rr[2] + 2 * rr0; gg[2] = gg[2] + 2 * gg0; bb[2] = bb[2] + 2 * bb0;
+                rr[4] = rr[4] + 2 * rr0; gg[4] = gg[4] + 2 * gg0; bb[4] = bb[4] + 2 * bb0; break;
+        case 6: rr[3] = rr[3] + 4 * rr0; gg[3] = gg[3] + 4 * gg0; bb[3] = bb[3] + 4 * bb0; break;
+        case 7: rr[3] = rr[3] + 2 * rr0; gg[3] = gg[3] + 2 * gg0; bb[3] = bb[3] + 2 * bb0;
+                rr[4] = rr[4] + 2 * rr0; gg[4] = gg[4] + 2 * gg0; bb[4] = bb[4] + 2 * bb0; break;
+        case 8: rr[4] = rr[4] + 4 * rr0; gg[4] = gg[4] + 4 * gg0; bb[4] = bb[4] + 4 * bb0; break;
+      }
+    }
+  }
+  for (xx = 1; xx <= 4; xx++)
+  { rr[xx] = Math.round(rr[xx] / Width / Height);
+    gg[xx] = Math.round(gg[xx] / Width / Height);
+    bb[xx] = Math.round(bb[xx] / Width / Height);
+  }
+  minDist = 10000;
+  for (xx = 0; xx <= 7; xx++)
+  { rr0 = rr[3]; gg0 = gg[3]; bb0 = bb[3]; nn0 = 1;
+    rr1 = 0; gg1 = 0; bb1 = 0; nn1 = 0;
+    if ((xx & 1) == 1)
+    { rr1 = rr1 + rr[1]; gg1 = gg1 + gg[1]; bb1 = bb1 + bb[1]; nn1 = nn1 + 1; }
+    else
+    { rr0 = rr0 + rr[1]; gg0 = gg0 + gg[1]; bb0 = bb0 + bb[1]; nn0 = nn0 + 1; }
+    if ((xx & 2) == 2)
+    { rr1 = rr1 + rr[2]; gg1 = gg1 + gg[2]; bb1 = bb1 + bb[2]; nn1 = nn1 + 1; }
+    else
+    { rr0 = rr0 + rr[2]; gg0 = gg0 + gg[2]; bb0 = bb0 + bb[2]; nn0 = nn0 + 1; }
+    if ((xx & 4) == 4)
+    { rr1 = rr1 + rr[4]; gg1 = gg1 + gg[4]; bb1 = bb1 + bb[4]; nn1 = nn1 + 1; }
+    else
+    { rr0 = rr0 + rr[4]; gg0 = gg0 + gg[4]; bb0 = bb0 + bb[4]; nn0 = nn0 + 1; }
+    rr0 = Math.floor(rr0 / nn0); 
+    gg0 = Math.floor(gg0 / nn0); 
+    bb0 = Math.floor(bb0 / nn0);
+    if (nn1 > 0)
+    { rr1 = Math.floor(rr1 / nn1); 
+      gg1 = Math.floor(gg1 / nn1); 
+      bb1 = Math.floor(bb1 / nn1);
+    } 
+    maxDist = 0;
+    Dist = ColorDist(rr0, gg0, bb0, rr[3], gg[3], bb[3]);
+    if (maxDist < Dist) maxDist = Dist;
+    if ((xx & 1) == 1)
+      Dist = ColorDist(rr1, gg1, bb1, rr[1], gg[1], bb[1]);
+    else
+      Dist = ColorDist(rr0, gg0, bb0, rr[1], gg[1], bb[1]);
+    if (maxDist < Dist) maxDist = Dist;
+    if ((xx & 2) == 2)
+      Dist = ColorDist(rr1, gg1, bb1, rr[2], gg[2], bb[2]);
+    else
+      Dist = ColorDist(rr0, gg0, bb0, rr[2], gg[2], bb[2]);
+    if (maxDist < Dist) maxDist = Dist;
+    if ((xx & 4) == 4)
+      Dist = ColorDist(rr1, gg1, bb1, rr[4], gg[4], bb[4]);
+    else
+      Dist = ColorDist(rr0, gg0, bb0, rr[4], gg[4], bb[4]);
+    if (maxDist < Dist) maxDist = Dist;
+    if (minDist > maxDist)
+    { minDist = maxDist;
+      fgCol = RGB2String(rr0, gg0, bb0);
+      nnStr = xx;
+      if (xx == 0) bgCol = fgCol;
+      else bgCol = RGB2String(rr1, gg1, bb1);
+    }
+  }
+  bbCol = bgCol;
+  ffCol = fgCol;
+  ssCol = ss[nnStr];
+  return([bbCol,ffCol,ssCol]);
+}
+
+function GetPixColLoQu(Left, Top, Width, Height)
+{ var ii, rr0, gg0, bb0, rrs, ggs, bbs, nn, cc, xx, yy, ss;
+  var xxc, yyc, minDist, maxDist, Dist, fgCol, bgCol, nnStr;
+  rrs = 0; 
+  ggs = 0; 
+  bbs = 0;
+  for (yy = 0; yy < Height; yy++)
+  { for (xx = 0; xx < Width; xx++)
+    { //cc = Pic.Point(xx + Left, yy + Top) //todo
+      //Long2RGB(cc, rr0, gg0, bb0);
+      ii=4*(yy+Top)*(XPos[1]-XPos[0])+4*(xx+Left);
+      rr0=imgData.data[ii+0];
+      gg0=imgData.data[ii+1];
+      bb0=imgData.data[ii+2];
+      rrs = rrs + rr0; 
+      ggs = ggs + gg0; 
+      bbs = bbs + bb0;
+    }
+  }
+  rrs = Math.round(rrs / Width / Height);
+  ggs = Math.round(ggs / Width / Height);
+  bbs = Math.round(bbs / Width / Height);
+  return(RGB2String(rrs, ggs, bbs));
+}
+
+function GetPixBW(Left, Top, Width, Height, BWEncoding, BWSmoothTransition)
+{ var ii, rr0, gg0, bb0, nn0, rr1, gg1, bb1, hh, dd, cc, xx, yy, ss, nn;
+  var xxc, yyc, minDist, maxDist, Dist, fgCol, bgCol, nnStr;
+  var rr=[], gg=[], bb=[], vv=[];
+  for (xx = 1; xx <= 4; xx++)
+  { rr[xx] = 0;
+    gg[xx] = 0; 
+    bb[xx] = 0;
+  }
+  for (yy = 0; yy < Height; yy++)
+  { yyc = 3;
+    if (2 * yy + 2 <= Height) yyc = 0;
+    if (2 * yy >= Height) yyc = 6;
+    for (xx = 0; xx < Width; xx++)
+    { //cc = Pic.Point(xx + Left, yy + Top); //todo
+      //Long2RGB(cc, rr0, gg0, bb0);
+      ii=4*(yy+Top)*(XPos[1]-XPos[0])+4*(xx+Left);
+      rr0=imgData.data[ii+0];
+      gg0=imgData.data[ii+1];
+      bb0=imgData.data[ii+2];
+      xxc = 1;
+      if (2 * xx + 2 <= Width) xxc = 0;
+      if (2 * xx >= Width) xxc = 2;
+      xxc = xxc + yyc;     
+      switch(xxc)
+      { case 0: rr[1] = rr[1] + 4 * rr0; gg[1] = gg[1] + 4 * gg0; bb[1] = bb[1] + 4 * bb0; break;
+        case 1: rr[1] = rr[1] + 2 * rr0; gg[1] = gg[1] + 2 * gg0; bb[1] = bb[1] + 2 * bb0;
+                rr[2] = rr[2] + 2 * rr0; gg[2] = gg[2] + 2 * gg0; bb[2] = bb[2] + 2 * bb0; break;
+        case 2: rr[2] = rr[2] + 4 * rr0; gg[2] = gg[2] + 4 * gg0; bb[2] = bb[2] + 4 * bb0; break;
+        case 3: rr[1] = rr[1] + 2 * rr0; gg[1] = gg[1] + 2 * gg0; bb[1] = bb[1] + 2 * bb0;
+                rr[3] = rr[3] + 2 * rr0; gg[3] = gg[3] + 2 * gg0; bb[3] = bb[3] + 2 * bb0; break;
+        case 4: rr[1] = rr[1] + rr0; gg[1] = gg[1] + gg0; bb[1] = bb[1] + bb0;
+                rr[2] = rr[2] + rr0; gg[2] = gg[2] + gg0; bb[2] = bb[2] + bb0;
+                rr[3] = rr[3] + rr0; gg[3] = gg[3] + gg0; bb[3] = bb[3] + bb0;
+                rr[4] = rr[4] + rr0; gg[4] = gg[4] + gg0; bb[4] = bb[4] + bb0; break;
+        case 5: rr[2] = rr[2] + 2 * rr0; gg[2] = gg[2] + 2 * gg0; bb[2] = bb[2] + 2 * bb0;
+                rr[4] = rr[4] + 2 * rr0; gg[4] = gg[4] + 2 * gg0; bb[4] = bb[4] + 2 * bb0; break;
+        case 6: rr[3] = rr[3] + 4 * rr0; gg[3] = gg[3] + 4 * gg0; bb[3] = bb[3] + 4 * bb0; break;
+        case 7: rr[3] = rr[3] + 2 * rr0; gg[3] = gg[3] + 2 * gg0; bb[3] = bb[3] + 2 * bb0;
+                rr[4] = rr[4] + 2 * rr0; gg[4] = gg[4] + 2 * gg0; bb[4] = bb[4] + 2 * bb0; break;
+        case 8: rr[4] = rr[4] + 4 * rr0; gg[4] = gg[4] + 4 * gg0; bb[4] = bb[4] + 4 * bb0; break;
+      }
+    }
+  }
+  nn = 0;
+  for (xx = 1; xx <= 4; xx++)
+  { rr[xx] = Math.round(rr[xx] / Width / Height);
+    gg[xx] = Math.round(gg[xx] / Width / Height);
+    bb[xx] = Math.round(bb[xx] / Width / Height);
+    vv[xx] = (2 * rr[xx] + 3 * gg[xx] + bb[xx]);
+    cc = 2 * rr[xx] + 3 * gg[xx] + bb[xx];
+    if (BWEncoding == 0)
+    { vv[xx] = Math.floor(6 * 255 * (vv[xx] - BWColMin) / (BWColMax - BWColMin));
+      if (vv[xx] < 0) vv[xx] = 0;
+      if (vv[xx] > 6 * 255) vv[xx] = 6 * 255;
+      cc = Math.floor(6 * 255 * (cc - BWColMin) / (BWColMax - BWColMin));
+      if (cc < 0) cc = 0;
+      if (cc > 6 * 255) cc = 6 * 255;
+    }
+    vv[xx] = Math.round(vv[xx] / 6);
+    nn = nn + cc;
+  }
+  if (BWSmoothTransition)
+  { nn = nn + (( Math.floor(Left / Width) + Math.floor(Top / Height) ) % 2) * 615 - 308;
+    if (nn < 0) nn = 0;
+    if (nn > 4 * 1230) nn = 4 * 1230;
+  }
+  switch(BWEncoding)
+  { case 0:
+      nn = Math.floor(nn / 1230);
+      break;
+    case 1:
+      nn = Math.floor(nn / 1230); //n = 0,1,2,3,4
+      vv[3] = vv[3] - 204;
+      vv[1] = vv[1] - 154;
+      vv[4] = vv[4] - 77;
+      break;
+    case 2:
+      nn = Math.floor(nn / 1230); //n = 0,1,2,3,4
+      if ((Math.floor(Left / Width) + Math.floor(Top / Height)) % 2 == 0)
+      { vv[3] = vv[3] - 24;
+        vv[2] = vv[2] - 16;
+        vv[1] = vv[1] - 8;
+      }
+      else
+      { vv[1] = vv[1] - 24;
+        vv[4] = vv[4] - 16;
+        vv[3] = vv[3] - 8;
+      }
+      break;
+    case 3:
+      nn = Math.floor(nn / 1230); //n = 0,1,2,3,4
+      dd = 2;
+      if ((Math.floor(Left / Width) + Math.floor(Top / Height)) % 2 == 0) dd = 4;
+      hh = GetHilbertShape(Math.floor(Left / Width), Math.floor(Top / Height));
+      switch(hh)
+      { case 0:
+          vv[1] = vv[1] - 3 * dd;
+          vv[3] = vv[3] - 2 * dd;
+          vv[4] = vv[4] - dd;
+          break;
+        case 1:
+          vv[1] = vv[1] - 3 * dd;
+          vv[2] = vv[2] - 2 * dd;
+          vv[4] = vv[4] - dd;
+          break;
+        case 2:
+          vv[4] = vv[4] - 3 * dd;
+          vv[2] = vv[2] - 2 * dd;
+          vv[1] = vv[1] - dd;
+          break;
+        case 3:
+          vv[4] = vv[4] - 3 * dd;
+          vv[3] = vv[3] - 2 * dd;
+          vv[1] = vv[1] - dd;
+          break;
+      }
+      break;
+  }
+  switch(nn)
+  { case 4:
+      nnStr = "&nbsp; ";
+      break;
+    case 3:
+      nnStr = "&nbsp;.";
+      if (vv[1] <= vv[2] && vv[1] <= vv[3] && vv[1] <= vv[4]) nnStr = "' ";
+      if (vv[2] <= vv[1] && vv[2] <= vv[3] && vv[2] <= vv[4]) nnStr = "&nbsp;'";
+      if (vv[3] <= vv[1] && vv[3] <= vv[2] && vv[3] <= vv[4]) nnStr = ". ";
+      break;      
+    case 2:
+      nnStr = ".'"
+      if (vv[1] <= vv[3] && vv[1] <= vv[4] && vv[2] <= vv[3] && vv[2] <= vv[4]) nnStr = "''";
+      if (vv[1] >= vv[3] && vv[1] >= vv[4] && vv[2] >= vv[3] && vv[2] >= vv[4]) nnStr = "..";
+      if (vv[1] <= vv[2] && vv[1] <= vv[4] && vv[3] <= vv[2] && vv[3] <= vv[4]) nnStr = "I ";
+      if (vv[1] >= vv[2] && vv[1] >= vv[4] && vv[3] >= vv[2] && vv[3] >= vv[4]) nnStr = "&nbsp;I";
+      if (vv[1] <= vv[2] && vv[1] <= vv[3] && vv[4] <= vv[2] && vv[4] <= vv[3]) nnStr = "'.";
+      break;      
+    case 1:
+      nnStr = "I'"
+      if (vv[1] >= vv[2] && vv[1] >= vv[3] && vv[1] >= vv[4]) nnStr = ".I";
+      if (vv[2] >= vv[1] && vv[2] >= vv[3] && vv[2] >= vv[4]) nnStr = "I.";
+      if (vv[3] >= vv[1] && vv[3] >= vv[2] && vv[3] >= vv[4]) nnStr = "'I";
+      break;
+    case 0: nnStr = "II";
+    break;
+  }
+  return(nnStr);
+}
+
+function ColorDist(rr0, gg0, bb0, rr1, gg1, bb1)
+{ return(Math.abs(rr0 - rr1) + Math.abs(gg0 - gg1) + Math.abs(bb0 - bb1));
+}
+
+function BWDist(rr0, rr1)
+{ return(Math.abs(rr0 - rr1));
+}
+
+function GetHilbertShape(aii, ajj)
+{ var ii = 4 * aii + ajj;
+  var jj = 4 * ajj + aii;
+  var ss = 1;
+  while ((ii >= ss) || (jj >= ss)) { ss = ss * 4; }
+  return(GetHilbertShapeEven(ii, jj, ss, 0));
+}
+
+function GetHilbertShapeEven(axx, ayy, asize, arot)
+{ if (asize == 1) return(arot % 4);
+  var xx = axx;
+  var yy = ayy;
+  var size2 = asize >> 1;
+  var rot = arot;
+  if (yy < size2)
+  { if (xx < size2)
+      return(GetHilbertShapeOdd(xx, yy, size2, rot));
+    else
+      return(GetHilbertShapeOdd(2 * size2 - 1 - xx, size2 - 1 - yy, size2, rot + 2));
+  }
+  else
+  { if (xx < size2)
+      return(GetHilbertShapeOdd(yy - size2, size2 - 1 - xx, size2, rot + 3));
+    else
+      return(GetHilbertShapeOdd(yy - size2, 2 * size2 - 1 - xx, size2, rot + 3));
+  }
+}
+
+function GetHilbertShapeOdd(axx, ayy, asize, arot)
+{ var xx = axx;
+  var yy = ayy;
+  var size2 = asize >> 1;
+  var rot = arot;
+  if (yy < size2)
+  { if (xx < size2)
+      return(GetHilbertShapeEven(xx, yy, size2, rot));
+    else
+      return(GetHilbertShapeEven(size2 - 1 - yy, xx - size2, size2, rot + 1));
+  }
+  else
+  { if (xx < size2)
+      return(GetHilbertShapeEven(size2 - 1 - xx, 2 * size2 - 1 - yy, size2, rot + 2));
+    else
+      return(GetHilbertShapeEven(2 * size2 - 1 - yy, xx - size2, size2, rot + 1));
+  }
+}
+</script>
+</body>
+</html>
